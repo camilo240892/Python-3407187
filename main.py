@@ -1,25 +1,28 @@
-from fastapi import FastAPI, HTTPException 
+from fastapi import FastAPI, HTTPException
 from modelos.clientes import cliente, ClienteCrear, ClienteEditar
+from modelos.facturas import Factura, FacturaCrear, FacturaEditar
+from modelos.transacciones import Transaccion, TransaccionCrear, TransaccionEditar
 
 app = FastAPI()
 
-    
 
-lista_clientes: list[cliente] = []  
+lista_clientes: list[cliente] = []
+lista_facturas: list[Factura] = []
+lista_transacciones: list[Transaccion] = []
 
 
-
-#endpoint, para obtener o listar todos los clientes
+# endpoint, para obtener o listar todos los clientes
 @app.get("/clientes", response_model=list[cliente])
 async def listar_clientes():
     return lista_clientes
 
-#endpoint, para obtener o listar un solo cliente de la lista
-@app.get("/clientes/{cliente_id}")
+
+# endpoint, para obtener o listar un solo cliente de la lista
+@app.get("/clientes/{cliente_id}", response_model=cliente)
 async def listar_cliente(cliente_id: int):
-    #recorrer la lista_clientes
+    # recorrer la lista_clientes
     for i, obj_cliente in enumerate(lista_clientes):
-        if obj_cliente.id("id") == cliente_id:
+        if obj_cliente.id == cliente_id:
             return obj_cliente
 
 
@@ -46,3 +49,71 @@ async def editar_cliente(cliente_id: int, datos_cliente: ClienteEditar):
     raise HTTPException(
         status_code=400, detail=f"El cliente con id {cliente_id}, no existe."
     )
+
+# endpoint eliminar cliente
+@app.delete("/clientes/{cliente_id}", response_model=cliente)
+async def eliminar_cliente(cliente_id: int):
+    for i, obj_cliente in enumerate(lista_clientes):
+        if obj_cliente.id == cliente_id:
+            cliente_eliminado = lista_clientes.pop(i)
+            return cliente_eliminado
+    raise HTTPException(
+        status_code=400, detail=f"El cliente con id {cliente_id}, no existe."
+    )
+
+
+# |||||||||||||||||||||||||||||||||||||
+# crear los endpoint para facturas
+
+
+@app.get("/facturas", response_model=list[Factura])
+async def listar_facturas():
+    return lista_facturas
+
+
+@app.get("/facturas/{id_factura}", response_model=Factura)
+async def listar_factura(id_factura: int):
+    pass
+
+
+@app.post("/facturas/{id_cliente}", response_model=Factura)
+async def crear_factura(id_cliente: int, datos_factura: Factura):
+    pass
+
+
+@app.patch("/facturas/{id_factura}", response_model=Factura)
+async def editar_factura(id_factura: int, datos_factura: Factura):
+    pass
+
+
+@app.delete("/facturas/{id_factura}", response_model=Factura)
+async def eliminar_factura(id_factura: int):
+    pass
+
+
+# crear los endpoint para transacciones
+
+
+@app.get("/transacciones", response_model=list[Transaccion])
+async def listar_ftransacciones():
+    pass
+
+
+@app.get("/transacciones/{id_transaccion}", response_model=Transaccion)
+async def listar_transaccion(id_transaccion: int):
+    pass
+
+
+@app.post("/transacciones/{id_factura}", response_model=Transaccion)
+async def crear_transaccion(id_factura: int, datos_transaccion: Transaccion):
+    pass
+
+
+@app.patch("/transacciones/{id_transaccion}", response_model=Transaccion)
+async def editar_transaccion(id_transaccion: int, datos_transaccion: Transaccion):
+    pass
+
+
+@app.delete("/transacciones/{id_transaccion}", response_model=Transaccion)
+async def eliminar_transaccion(id_transaccion: int):
+    pass
