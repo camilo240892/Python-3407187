@@ -10,5 +10,8 @@ class ClienteBase(BaseModel):
 class ClienteCrear(ClienteBase):
     pass
 
+class ClienteEditar(ClienteBase):
+    pass
+
 class cliente(ClienteBase):
     id: int | None = None 
