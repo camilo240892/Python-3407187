@@ -1,0 +1,4 @@
+#No se deben incluir entornos virtuales
+.mi_env/
+#pycache
+__pycache__/
