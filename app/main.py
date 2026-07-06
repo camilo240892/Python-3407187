@@ -149,13 +149,11 @@ async def crear_transaccion(factura_id: int, datos_transaccion: TransaccionCrear
     transaccion_val = Transaccion.model_validate(datos_transaccion.model_dump())
     transaccion_val.factura_id = factura_id
     factura_encontrada.transacciones.append(transaccion_val)
-#    id de la transaccion
-    transaccion_val.id = len(lista_transacciones) + 1
-    return transaccion_val
     # id de la transaccion
     transaccion_val.id = len(lista_transacciones) + 1
+    # falto agregar a la lista de transacciones
+    lista_transacciones.append(transaccion_val)
     return transaccion_val
-
 
 @app.patch("/transacciones/{id_transaccion}", response_model=Transaccion)
 async def editar_transaccion(id_transaccion: int, datos_transaccion: Transaccion):
