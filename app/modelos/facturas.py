@@ -2,7 +2,7 @@ from pydantic import BaseModel, computed_field
 from sqlmodel import SQLModel, Field, Relationship
 
 from .transacciones import Transaccion
-from .clientes import Cliente
+from .clientes import Cliente, ClienteLeer
 from datetime import datetime
 # El decorador @property proviene de Python y sirve para convertir un método de una clase en una propiedad de ...
 # Validación Pydantic v2, @computed_field es un decorador que te permite definir propiedades o métodos que se ...
@@ -55,3 +55,11 @@ class FacturaEditar(FacturaBase):
 class Factura(FacturaBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     cliente_id: int = Field(default=None, foreign_key="cliente.id")
+
+    # crear relaciones virtuales con cliente - NO en la BD
+    cliente: Cliente = Relationship(back_populates="factura")
+
+
+class FacturaLeer(FacturaBase):
+    id: int
+    cliente: ClienteLeer

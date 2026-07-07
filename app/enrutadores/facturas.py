@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, status
-from ..modelos.facturas import Factura, FacturaCrear, FacturaEditar
+from ..modelos.facturas import Factura, FacturaCrear, FacturaEditar, FacturaLeer
 from ..modelos.clientes import Cliente
 from ..listas import lista_clientes, lista_facturas
 from ..conexion_bd import Sesion_dependencia
@@ -11,7 +11,7 @@ rutas_facturas = APIRouter()
 # lista_facturas: list[Factura] = []
 
 
-@rutas_facturas.get("/facturas", response_model=list[Factura])
+@rutas_facturas.get("/facturas", response_model=list[FacturaLeer])
 async def listar_facturas(sesion: Sesion_dependencia):
     #select * from factura
     consulta = select(Factura)
@@ -20,18 +20,15 @@ async def listar_facturas(sesion: Sesion_dependencia):
 
 
 @rutas_facturas.get("/facturas/{factura_id}", response_model=Factura)
-@rutas_facturas.get("/facturas/{factura_id}", response_model=Factura)
-async def listar_factura(factura_id: int, sesion: Sesion_dependencia):
-
-    factura = sesion.get(Factura, factura_id)
-
-    if not factura:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"La factura con id {factura_id}, no existe.",
-        )
-
-    return factura
+async def listar_factura(factura_id: int):
+    # recorrer la lista facturas
+    for i, obj_factura in enumerate(lista_facturas):
+        if obj_factura.id == factura_id:
+            return obj_factura
+    raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail=f"La factura con id {factura_id}, no existe.",
+    )
 
 @rutas_facturas.post("/facturas/{cliente_id}", response_model=Factura)
 async def crear_factura(cliente_id: int, datos_factura: FacturaCrear, sesion:Sesion_dependencia):
