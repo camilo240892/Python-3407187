@@ -5,6 +5,7 @@ from sqlmodel import SQLModel, Field, Relationship
 class TransaccionBase(SQLModel):
     cantidad: int = Field(default=0)
     vr_unitario: float = Field(default=0.0)
+    descripcion: str = Field(default=None)
 
 class TransaccionCrear(TransaccionBase):
     pass
