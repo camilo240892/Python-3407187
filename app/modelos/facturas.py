@@ -56,10 +56,18 @@ class Factura(FacturaBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     cliente_id: int = Field(default=None, foreign_key="cliente.id")
 
-    # crear relaciones virtuales con cliente - NO en la BD
+    # crear relaciones virtuales con cliente, transacciones - NO en la BD
     cliente: Cliente = Relationship(back_populates="factura")
+    transacciones: list[Transaccion] = Relationship(back_populates="factura")
 
-
+# crea modelo para mostrar la usuario o el cliente
 class FacturaLeer(FacturaBase):
     id: int
     cliente: ClienteLeer
+    # pero no es recomendable, por la buenas practicas
+    # transacciones: list[Transaccion] = []
+
+
+class FacturaLeerCompuesta(FacturaLeer):
+    transacciones: list[Transaccion] = []
+

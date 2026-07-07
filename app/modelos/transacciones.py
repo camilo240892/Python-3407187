@@ -19,3 +19,9 @@ class Transaccion(TransaccionBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     factura_id: int | None = Field(default=None, foreign_key="factura.id")
     # aqui va la relacion con el modelo factura(solo un campo)
+    #optional
+    factura: "Factura" = Relationship(back_populates="transacciones")
+
+    #Crea modelo para mostrar la usuario o el cliente
+    class TransaccionLeer(TransaccionBase):
+        id:int
