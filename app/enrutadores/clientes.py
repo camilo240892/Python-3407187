@@ -1,5 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 from ..modelos.clientes import Cliente, ClienteCrear, ClienteEditar
+from ..modelos.facturas import Factura
+from ..modelos.transacciones import Transaccion
 from ..listas import lista_clientes
 from ..conexion_bd import Sesion_dependencia
 from sqlmodel import select
@@ -56,16 +58,40 @@ async def editar_cliente(
     mi_sesion.refresh(cliente_bd)
     return cliente_bd 
 
-# endpoint eliminar cliente
 @rutas_clientes.delete("/clientes/{cliente_id}", response_model=Cliente)
 async def eliminar_cliente(cliente_id: int, mi_sesion: Sesion_dependencia):
     cliente_bd = mi_sesion.get(Cliente, cliente_id)
+
     if not cliente_bd:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"El cliente con id {cliente_id}, no existe.",
         )
+
+    # Buscar facturas del cliente
+    facturas = mi_sesion.exec(
+        select(Factura).where(Factura.cliente_id == cliente_id)
+    ).all()
+
+    for factura in facturas:
+
+        # Buscar transacciones de la factura
+        transacciones = mi_sesion.exec(
+            select(Transaccion).where(
+                Transaccion.factura_id == factura.id
+            )
+        ).all()
+
+        # Eliminar transacciones
+        for transaccion in transacciones:
+            mi_sesion.delete(transaccion)
+
+        # Eliminar factura
+        mi_sesion.delete(factura)
+
+    # Eliminar cliente
     mi_sesion.delete(cliente_bd)
+
     mi_sesion.commit()
-    # retornar un mensaje, deben quitar el response_model
+
     return cliente_bd

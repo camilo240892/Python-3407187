@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 from ..modelos.facturas import Factura, FacturaCrear, FacturaEditar, FacturaLeer, FacturaLeerCompuesta
 from ..modelos.clientes import Cliente
+from ..modelos.transacciones import Transaccion
 from ..listas import lista_clientes, lista_facturas
 from ..conexion_bd import Sesion_dependencia
 from sqlmodel import select
@@ -83,15 +84,27 @@ async def editar_factura(factura_id: int, datos_factura: FacturaEditar):
 
 # endpoint para eliminar una factura
 @rutas_facturas.delete("/facturas/{factura_id}", response_model=Factura)
-async def eliminar_factura(factura_id: int):
-    for i, obj_factura in enumerate(lista_facturas):
-        if obj_factura.id == factura_id:
+async def eliminar_factura(factura_id: int, sesion: Sesion_dependencia):
 
-            factura_eliminada = lista_facturas.pop(i)
+    factura_bd = sesion.get(Factura, factura_id)
 
-            return factura_eliminada
+    if not factura_bd:
+        raise HTTPException(
+            status_code=400,
+            detail=f"La factura con id {factura_id}, no existe."
+        )
 
-    raise HTTPException(
-        status_code=400,
-        detail=f"La factura con id {factura_id}, no existe."
-    )
+    # Eliminar transacciones asociadas
+    transacciones = sesion.exec(
+        select(Transaccion).where(
+            Transaccion.factura_id == factura_id
+        )
+    ).all()
+
+    for transaccion in transacciones:
+        sesion.delete(transaccion)
+
+    sesion.delete(factura_bd)
+    sesion.commit()
+
+    return factura_bd

@@ -53,16 +53,23 @@ async def editar_transaccion(id_transaccion: int, datos_transaccion: Transaccion
     pass
 
 @rutas_transacciones.delete("/transacciones/{transaccion_id}", response_model=Transaccion)
-async def eliminar_transaccion(transaccion_id: int):
-    for i, obj_transaccion in enumerate(lista_transacciones):
-        if obj_transaccion.id == transaccion_id:
+async def eliminar_transaccion(
+    transaccion_id: int,
+    sesion: Sesion_dependencia
+):
 
-            transaccion_eliminada = lista_transacciones.pop(i)
-
-            return transaccion_eliminada
-
-    raise HTTPException(
-        status_code=400,
-        detail=f"La transacción con id {transaccion_id}, no existe."
+    transaccion_bd = sesion.get(
+        Transaccion,
+        transaccion_id
     )
 
+    if not transaccion_bd:
+        raise HTTPException(
+            status_code=400,
+            detail=f"La transacción con id {transaccion_id}, no existe."
+        )
+
+    sesion.delete(transaccion_bd)
+    sesion.commit()
+
+    return transaccion_bd
